@@ -7,12 +7,16 @@ Branch tree:
 dix -> dev -> main
 
 Dixxe current tasks
+wip:
 1. Shop
-2. More user-bot interactions
-3. Jobs, payday
-4. Buying roles, shop
+2. inventory
 
-Shop road map:
+waiting for their turn:
+3. More user-bot interactions
+4. Jobs, payday
+
+
+Shop road map:         d
 1. slaves (XD)
 2. Plushes
 3. roles
