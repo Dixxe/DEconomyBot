@@ -1,7 +1,13 @@
 # DEconomyBot
 Discord bot on cogs focused on economy and user-bot interactions.
 
-Road-map:
-1. Optimisation for multi-server check (acs value)
-2. More commands
-3. Jobs
+Dixxe active working branch, unstable.
+
+Branch tree:
+dix -> dev -> main
+
+Dixxe current tasks
+1. More commands
+2. More user-bot interactions
+3. Jobs, payday
+4. Buying roles, shop

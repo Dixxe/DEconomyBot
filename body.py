@@ -64,7 +64,7 @@ async def on_ready():
         importData()
         global bufer
         bufer = importData()
-        print(f'Loading succesful. {importData()}')
+        print('Loading succesful.')
     except:
         print('No saves found')
     eco = bot.get_cog('Economy')
@@ -94,6 +94,8 @@ async def on_message(message):
         await bot.process_commands(message)
 
 #----------------------classes------------------------#
+
+#------------------economy class-----------------#
 class Economy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -109,7 +111,7 @@ class Economy(commands.Cog):
     ## операции для ввода-вывода банка ##
     
     
-    async def withdraw_money(self, member, money):
+    async def withdraw_money(self, member, money): # вывод денег
         if (member not in self.__bank):
             return '404' # не найдено
 
@@ -118,12 +120,14 @@ class Economy(commands.Cog):
         else:
             self.__bank[f'{member}'] -= money
 
-    async def give_money(self, member, money):
+    async def give_money(self, member, money): # начисление денег
         if (member not in self.__bank):
             self.__bank[f'{member}'] = money
         else:
             self.__bank[f'{member}'] += money
+
 bot.add_cog(Economy(bot))
+#------------------economy class-----------------#
 
 class AdminCommands(commands.Cog):
     def __init__(self, bot):
@@ -138,7 +142,8 @@ class AdminCommands(commands.Cog):
 
 
 class UserCommands(commands.Cog):
-    eco = bot.get_cog('Economy')
+    eco = bot.get_cog('Economy') # получаю класс экономики
+    # bank = self.eco.get_bank() - получение банка из функции внутри класса выглядит так
     def __init__(self, bot):
         self.bot = bot
 
@@ -153,12 +158,12 @@ class UserCommands(commands.Cog):
 
     @commands.slash_command(description='Попытай удачу ограбить банк.')
     async def rob_bank(self, slash_inter):
-        if acs:
+        if (acs):
             bank = self.eco.get_bank()
             rand = randint(500, 1000)
             await slash_inter.send(f"{slash_inter.author.mention} started a bank robbery!!!")
             await asyncio.sleep(5)
-            if chance(20):
+            if (chance(20)):
                 try:
                     moni = floor(bank[f'{slash_inter.author.mention}'] * 0.2 + rand) # округляю(20% от денег игрока + рандомное колво денег в банке)
                     await self.eco.give_money(slash_inter.author.mention, moni) # перевожу денег игроку на счет
@@ -172,7 +177,7 @@ class UserCommands(commands.Cog):
                     moni = floor(bank[f'{slash_inter.author.mention}'] * 0.7) # отбираем 70 процентов денег игрока
                     res = await self.eco.withdraw_money(slash_inter.author.mention, moni)
 
-                    if res == '204': # если каким то чудом денег вдруг не хватило то тебя отпускают
+                    if (res == '204'): # если каким то чудом денег вдруг не хватило то тебя отпускают
                         await slash_inter.edit_original_response(f"Ouch, {slash_inter.author} has been caught by cops, but you don't have enough money to pay fine, so they just let you free XD")
                     else:  
                         await slash_inter.edit_original_response(f'Ouch, {slash_inter.author} has been caught by cops, and payed fine for {moni} dcoins')
@@ -181,11 +186,11 @@ class UserCommands(commands.Cog):
 
     @commands.slash_command(description='Попытай удачу ограбить кого-то.')
     async def rob(self, slash_inter, member: disnake.Member):
-        if acs:
+        if (acs):
             await slash_inter.send(f"{slash_inter.author.mention} get this personal and wants to rob {member}.")
             await asyncio.sleep(3)
             bank = self.eco.get_bank() # обьявляю банк
-            if chance(30): # шансы 
+            if (chance(30)): # шансы 
                 try: # проверка на ошибку
                     pred_bank = bank[f'{member.mention}'] # кошелек жертвы
                     moni = floor(pred_bank * 0.1) # 10% от денег жертвы 
@@ -208,15 +213,15 @@ class UserCommands(commands.Cog):
     async def give_money(self, slash_inter, memb: disnake.Member, money:int):
         await slash_inter.send(f'Money transmission in process...')
         await asyncio.sleep(1)
-        if acs:
-            if slash_inter.author.mention == memb.mention:
+        if (acs):
+            if (slash_inter.author.mention == memb.mention):
                 await slash_inter.edit_original_response(f"You really think that im so dumb?")
             else:
                 bank = self.eco.get_bank()
                 try:
                     comission = floor(money * 0.9) # комиссия 10% сволочи
                     res = await self.eco.withdraw_money(slash_inter.author.mention, money)
-                    if res == '204':
+                    if (res == '204'):
                         await slash_inter.edit_original_response(f"Operation terminated. You don't have enough money")
                     else:
                         await self.eco.give_money(memb.mention, comission)
@@ -236,12 +241,16 @@ class UserCommands(commands.Cog):
 
 #------------tasks------------------#
 
-@tasks.loop(minutes=1.0) ## цикл сохранения переменных в файл линия 180
+@tasks.loop(minutes=1.0) ## цикл сохранения переменных в файл
 async def save(bufer, bank):
     try:
         exportData(bufer, bank)
     except Exception:
         pass
+
+@tasks.loop(hours=24) # луп для получения зарплаты, и оплаты ролей и тд
+async def payday():
+    pass
 
 #------------tasks------------------#
 
