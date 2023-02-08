@@ -7,7 +7,7 @@ Branch tree:
 dix -> dev -> main
 
 Dixxe current tasks
-1. More commands
+1. Shop
 2. More user-bot interactions
 3. Jobs, payday
 4. Buying roles, shop

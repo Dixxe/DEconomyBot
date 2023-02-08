@@ -68,7 +68,8 @@ async def on_ready():
     except:
         print('No saves found')
     eco = bot.get_cog('Economy')
-    save.start(bufer, bank=eco.get_bank())
+    save.start(bufer, bank=eco.get_bank()) # запускаю цикл сохранок
+    checks.start()                         # запускаю цикл проверок
 
 @bot.event
 async def on_guild_join(guild):
@@ -109,6 +110,15 @@ class Economy(commands.Cog):
     def get_bank(self):
         return self.__bank
     ## операции для ввода-вывода банка ##
+
+    async def checking_wallets(self): # удаляем кошельки без денег
+        try:                          # ловим ошибульки
+            for i in self.__bank.keys():
+                if self.__bank[f'{i}'] < 1:
+                    self.__bank.pop(f'{i}')
+        except Exception:             # ловим ошибульки
+            pass
+        
     
     
     async def withdraw_money(self, member, money): # вывод денег
@@ -147,6 +157,7 @@ class UserCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    ####-money commands----------#
     @commands.slash_command(description='Посмотреть в свой кошелек')
     async def wallet(self, slash_inter):
         if acs and self.eco is not None:
@@ -154,10 +165,10 @@ class UserCommands(commands.Cog):
             if slash_inter.author.mention not in bank:
                 await slash_inter.send("*/Oohh, I think I don't have wallet/*", ephemeral = True)
             else:
-                await slash_inter.send(f"*/you looking in your wallet and see {bank[f'{slash_inter.author.mention}']} dcoins/*", ephemeral = True)
+                await slash_inter.send(f"*/you looking in your wallet and see {bank[f'{slash_inter.author.mention}']} DCoins/*", ephemeral = True)
 
     @commands.slash_command(description='Попытай удачу ограбить банк.')
-    async def rob_bank(self, slash_inter):
+    async def rob_bank(self, slash_inter): # грабануть банк
         if (acs):
             bank = self.eco.get_bank()
             rand = randint(500, 1000)
@@ -170,7 +181,7 @@ class UserCommands(commands.Cog):
                 except Exception: # если у игрона не будет кошеля, то выйдет ошибка которая здесь поймается и игроку насчет начислет только колво денег в банке
                     moni = rand
                     await self.eco.give_money(slash_inter.author.mention, moni)
-                await slash_inter.edit_original_response(f"Yoo {slash_inter.author} succesfully rob a bank for {moni} dcoins!!!")
+                await slash_inter.edit_original_response(f"Yoo {slash_inter.author} succesfully rob a bank for {moni} DCoins!!!")
             
             else:
                 try:
@@ -180,11 +191,11 @@ class UserCommands(commands.Cog):
                     if (res == '204'): # если каким то чудом денег вдруг не хватило то тебя отпускают
                         await slash_inter.edit_original_response(f"Ouch, {slash_inter.author} has been caught by cops, but you don't have enough money to pay fine, so they just let you free XD")
                     else:  
-                        await slash_inter.edit_original_response(f'Ouch, {slash_inter.author} has been caught by cops, and payed fine for {moni} dcoins')
+                        await slash_inter.edit_original_response(f'Ouch, {slash_inter.author} has been caught by cops, and payed fine for {moni} DCoins')
                 except Exception: # если нет кошелька то ты просто убегаешь (ИРОНИЯ АХХАХА)
                     await slash_inter.edit_original_response(f'Ouch, {slash_inter.author} has been caught by cops, but managed to run away')
 
-    @commands.slash_command(description='Попытай удачу ограбить кого-то.')
+    @commands.slash_command(description='Попытай удачу ограбить кого-то.') # грабануть
     async def rob(self, slash_inter, member: disnake.Member):
         if (acs):
             await slash_inter.send(f"{slash_inter.author.mention} get this personal and wants to rob {member}.")
@@ -196,7 +207,7 @@ class UserCommands(commands.Cog):
                     moni = floor(pred_bank * 0.1) # 10% от денег жертвы 
                     await self.eco.withdraw_money(member.mention, moni) # перевожу на счет грабителю
                     await self.eco.give_money(slash_inter.author.mention, moni) # снимаю со счета жертвы
-                    await slash_inter.edit_original_response(f"You succesfully rob {member} and take {moni} dcoins with you.") #
+                    await slash_inter.edit_original_response(f"You succesfully rob {member} and take {moni} DCoins with you.") #
                 except Exception:
                     await slash_inter.edit_original_response(f"You found {member} wallet empty, lol")
             else:
@@ -205,11 +216,11 @@ class UserCommands(commands.Cog):
                     moni = floor(thief_bank * 0.5)
                     await self.eco.withdraw_money(slash_inter.author.mention, moni)
                     await self.eco.give_money(member.mention, moni)
-                    await slash_inter.edit_original_response(f"{member} caught you and take {moni} dcoins from you")
+                    await slash_inter.edit_original_response(f"{member} caught you and take {moni} DCoins from you")
                 except Exception:
                     await slash_inter.edit_original_response(f"{slash_inter.author.mention} was caughted by {member} and bonked.")
                 
-    @commands.slash_command(description='Передать деньги кому-то.')
+    @commands.slash_command(description='Передать деньги кому-то.') # дать денег
     async def give_money(self, slash_inter, memb: disnake.Member, money:int):
         await slash_inter.send(f'Money transmission in process...')
         await asyncio.sleep(1)
@@ -217,7 +228,6 @@ class UserCommands(commands.Cog):
             if (slash_inter.author.mention == memb.mention):
                 await slash_inter.edit_original_response(f"You really think that im so dumb?")
             else:
-                bank = self.eco.get_bank()
                 try:
                     comission = floor(money * 0.9) # комиссия 10% сволочи
                     res = await self.eco.withdraw_money(slash_inter.author.mention, money)
@@ -228,7 +238,16 @@ class UserCommands(commands.Cog):
                         await slash_inter.edit_original_response(f'Operation succes.')
                 except Exception:
                     await slash_inter.edit_original_response(f"Something went wrong. Please check arguments.")
-    
+
+    @commands.slash_command(description='Открыть магазин')
+    async def shop(self, slash_inter):
+        emb = disnake.Embed(title='Магазин ништяков', color=randint(1, 16777216))
+        emb.add_field(name='Купить уникальную роль!!', value='Цена:1000 DCoins. Обслуживание в день:500 DCoins.')
+        await slash_inter.send(embed = emb)
+    ####-money commands----------#
+
+
+
     @commands.slash_command(description='Получить аватар пользователя') ## аватарка чек
     async def avatar(slash_inter, member : disnake.Member=None):
         try:
@@ -247,6 +266,10 @@ async def save(bufer, bank):
         exportData(bufer, bank)
     except Exception:
         pass
+@tasks.loop(minutes=1)
+async def checks():
+    eco = bot.get_cog('Economy') # получаю класс экономики
+    await eco.checking_wallets()
 
 @tasks.loop(hours=24) # луп для получения зарплаты, и оплаты ролей и тд
 async def payday():
