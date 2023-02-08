@@ -120,16 +120,15 @@ class Economy(commands.Cog):
             pass
     
     async def buy(self, member, product):
-        res = self.withdraw_money(member, product.price)
+        res = asyncio.run_coroutine_threadsafe(self.withdraw_money(member, product.price), loop=asyncio.get_event_loop()) # насчет асунцио загуглил сам, по сути запускает выполнение функции отдельно а ответ сохраняет
         if res == '204' or '404':         # ошибки функции снятия денег
             return '204'                  # нельзя нету денег или кошелька
         else:
             return '200'                  # все было обработано, держи товар
 
     async def sell(self, member, product):
-        wallet = self.__bank[f'{member}']
-        cashback = product.price * 0.7 # верну пользователю только 70% от стоимости товара
-        self.give_money
+        cashback = floor(product.price * 0.7) # верну пользователю только 70% от стоимости товара
+        self.give_money(member, cashback)
     
     
     async def withdraw_money(self, member, money): # вывод денег
@@ -155,8 +154,9 @@ class Product(): # класс для простого создания прод�
         self.category :str = category
         self.name     :str = name
         self.price    :int = price
-
-
+global products
+plush1 = Product('Plush', 'Dixxe plush', 100)
+products = [plush1]
 #------------------economy classes-----------------#
 
 class AdminCommands(commands.Cog):
@@ -268,6 +268,10 @@ class UserCommands(commands.Cog):
         emb.add_field(name='Купить уникальную роль!!', value='Цена:1000 DCoins. Обслуживание в день:500 DCoins.')
         await slash_inter.send(embed = emb)
 
+    @commands.slash_command(description='WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP')
+    async def test(self, slash_inter):
+        await self.eco.buy(slash_inter.author.mention, products[0])
+        await slash_inter.send(f'You bought {products[0].name} for {products[0].price}')
     # HEAVY WIP HEAVY WIP HEAVY WIP HEAVY WIP HEAVY WIP HEAVY WIP #
     ####-money commands----------#
 
