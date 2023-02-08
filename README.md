@@ -11,3 +11,8 @@ Dixxe current tasks
 2. More user-bot interactions
 3. Jobs, payday
 4. Buying roles, shop
+
+Shop road map:
+1. slaves (XD)
+2. Plushes
+3. roles

@@ -96,7 +96,7 @@ async def on_message(message):
 
 #----------------------classes------------------------#
 
-#------------------economy class-----------------#
+#------------------economy classes-----------------#
 class Economy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -118,7 +118,18 @@ class Economy(commands.Cog):
                     self.__bank.pop(f'{i}')
         except Exception:             # ловим ошибульки
             pass
-        
+    
+    async def buy(self, member, product):
+        res = self.withdraw_money(member, product.price)
+        if res == '204' or '404':         # ошибки функции снятия денег
+            return '204'                  # нельзя нету денег или кошелька
+        else:
+            return '200'                  # все было обработано, держи товар
+
+    async def sell(self, member, product):
+        wallet = self.__bank[f'{member}']
+        cashback = product.price * 0.7 # верну пользователю только 70% от стоимости товара
+        self.give_money
     
     
     async def withdraw_money(self, member, money): # вывод денег
@@ -137,7 +148,16 @@ class Economy(commands.Cog):
             self.__bank[f'{member}'] += money
 
 bot.add_cog(Economy(bot))
-#------------------economy class-----------------#
+
+class Product(): # класс для простого создания продуктов
+
+    def __init__(self, category, name, price):
+        self.category :str = category
+        self.name     :str = name
+        self.price    :int = price
+
+
+#------------------economy classes-----------------#
 
 class AdminCommands(commands.Cog):
     def __init__(self, bot):
@@ -239,11 +259,16 @@ class UserCommands(commands.Cog):
                 except Exception:
                     await slash_inter.edit_original_response(f"Something went wrong. Please check arguments.")
 
+
+    # HEAVY WIP HEAVY WIP HEAVY WIP HEAVY WIP HEAVY WIP HEAVY WIP #
+
     @commands.slash_command(description='Открыть магазин')
     async def shop(self, slash_inter):
         emb = disnake.Embed(title='Магазин ништяков', color=randint(1, 16777216))
         emb.add_field(name='Купить уникальную роль!!', value='Цена:1000 DCoins. Обслуживание в день:500 DCoins.')
         await slash_inter.send(embed = emb)
+
+    # HEAVY WIP HEAVY WIP HEAVY WIP HEAVY WIP HEAVY WIP HEAVY WIP #
     ####-money commands----------#
 
 
