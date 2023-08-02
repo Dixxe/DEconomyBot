@@ -1,4 +1,5 @@
 # DEconomyBot
+Currently frozen and still WIP.
 Discord bot on cogs focused on economy and user-bot interactions.
 
 Road-map:
